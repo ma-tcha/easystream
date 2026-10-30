@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>EasyStream</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 620px;
+      font-family: monospace;
+      font-size: 12px;
+      background: #0d1117;
+      color: #c9d1d9;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+    }
+    header h1 { font-size: 13px; color: #58a6ff; letter-spacing: 1px; }
+    #clear-btn {
+      font-size: 11px;
+      color: #8b949e;
+      background: none;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+    #clear-btn:hover { color: #f85149; border-color: #f85149; }
+    #list { max-height: 520px; overflow-y: auto; }
+    #empty { padding: 30px; text-align: center; color: #484f58; }
+    .stream { border-bottom: 1px solid #21262d; padding: 10px 14px; }
+    .stream-url {
+      color: #79c0ff;
+      word-break: break-all;
+      margin-bottom: 4px;
+    }
+    .stream-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .stream-time { color: #484f58; font-size: 10px; }
+    .stream-info { color: #8b949e; font-size: 10px; }
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .progress-wrap.hidden { display: none; }
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #58a6ff;
+      border-radius: 3px;
+      transition: width 0.15s;
+    }
+    .progress-text { color: #8b949e; font-size: 10px; white-space: nowrap; min-width: 100px; }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .dl-btn {
+      background: #1f6feb;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 4px 12px;
+      white-space: nowrap;
+    }
+    .dl-btn:hover:not(:disabled) { background: #388bfd; }
+    .dl-btn:disabled { opacity: 0.6; cursor: default; }
+    .dl-btn.done { background: #238636; }
+    .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tab {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #8b949e;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 3px 10px;
+    }
+    .tab:hover { color: #c9d1d9; border-color: #484f58; }
+    .tab.active { color: #58a6ff; border-color: #58a6ff; background: #0d1117; }
+    .cmd-block {
+      position: relative;
+      background: #010409;
+      border: 1px solid #21262d;
+      border-radius: 4px;
+      padding: 8px 40px 8px 10px;
+    }
+    .cmd-block pre { white-space: pre-wrap; word-break: break-all; color: #a5d6ff; line-height: 1.6; }
+    .cmd-block.hidden { display: none; }
+    .copy-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #8b949e;
+      cursor: pointer;
+      font-size: 10px;
+      padding: 2px 6px;
+    }
+    .copy-btn:hover { background: #30363d; color: #c9d1d9; }
+    .copy-btn.copied { color: #3fb950; border-color: #3fb950; }
+    footer {
+      padding: 6px 14px;
+      text-align: right;
+      color: #484f58;
+      font-size: 10px;
+      border-top: 1px solid #21262d;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>▶ EasyStream</h1>
+    <button id="clear-btn">Effacer</button>
+  </header>
+  <div id="list"><div id="empty">Aucun flux M3U8 détecté.</div></div>
+  <footer>© 2026 Matcha</footer>
+  <script src="popup.js"></script>
+</body>
+</html>
