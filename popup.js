@@ -24,12 +24,6 @@ function formatTime(ts) {
   return new Date(ts).toLocaleTimeString('fr-FR');
 }
 
-function formatDuration(sec) {
-  if (!sec) return '';
-  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
-  return m > 0 ? `${m}m ${s}s` : `${s}s`;
-}
-
 function buildCurl(stream) {
   const lines = [`curl ${shQuote(stream.url)}`, '  --compressed'];
   for (const key of HEADER_ORDER) {
@@ -72,56 +66,6 @@ function buildYtdlp(stream) {
 
 const COMMANDS = { curl: buildCurl, ffmpeg: buildFfmpeg, vlc: buildVlc, 'yt-dlp': buildYtdlp };
 
-// ── Download via background service worker (bypasses CORS) ───────────────────
-
-function startDownload(stream, idx) {
-  const dlBtn  = document.getElementById(`dl-btn-${idx}`);
-  const pWrap  = document.getElementById(`progress-${idx}`);
-  const pBar   = document.getElementById(`progress-bar-${idx}`);
-  const pText  = document.getElementById(`progress-text-${idx}`);
-  const infoEl = document.getElementById(`info-${idx}`);
-
-  dlBtn.disabled = true;
-  dlBtn.textContent = 'Connexion…';
-  pWrap.classList.remove('hidden');
-  pBar.style.width = '0%';
-  pText.textContent = '…';
-
-  const listener = (msg) => {
-    if (msg.idx !== idx) return;
-
-    if (msg.action === 'downloadStatus') {
-      pText.textContent = msg.status;
-
-    } else if (msg.action === 'downloadInfo') {
-      infoEl.textContent = `${msg.segmentCount} segments · ${formatDuration(msg.duration)}`;
-      pText.textContent = `0 / ${msg.segmentCount} · 0%`;
-
-    } else if (msg.action === 'downloadProgress') {
-      const pct = Math.round((msg.current / msg.total) * 100);
-      pBar.style.width = pct + '%';
-      pText.textContent = `${msg.current} / ${msg.total} · ${pct}%`;
-
-    } else if (msg.action === 'downloadDone') {
-      chrome.runtime.onMessage.removeListener(listener);
-      pBar.style.width = '100%';
-      pText.textContent = 'Terminé';
-      dlBtn.textContent = '✓ Téléchargé';
-      dlBtn.classList.add('done');
-
-    } else if (msg.action === 'downloadError') {
-      chrome.runtime.onMessage.removeListener(listener);
-      dlBtn.disabled = false;
-      dlBtn.textContent = '⬇ Télécharger';
-      pBar.style.width = '0%';
-      pText.textContent = `Erreur : ${msg.error}`;
-    }
-  };
-
-  chrome.runtime.onMessage.addListener(listener);
-  chrome.runtime.sendMessage({ action: 'startDownload', stream, idx });
-}
-
 // ── Render ───────────────────────────────────────────────────────────────────
 
 function render(streams) {
@@ -136,14 +80,8 @@ function render(streams) {
       <div class="stream-url" title="${escapeHtml(s.url)}">${escapeHtml(s.url)}</div>
       <div class="stream-meta">
         <span class="stream-time">${formatTime(s.ts)}</span>
-        <span class="stream-info" id="info-${i}"></span>
-      </div>
-      <div class="progress-wrap hidden" id="progress-${i}">
-        <div class="progress-track"><div class="progress-bar" id="progress-bar-${i}"></div></div>
-        <span class="progress-text" id="progress-text-${i}"></span>
       </div>
       <div class="actions">
-        <button class="dl-btn" id="dl-btn-${i}">⬇ Télécharger</button>
         <div class="tabs">
           ${Object.keys(COMMANDS).map((cmd, j) =>
             `<button class="tab${j === 0 ? ' active' : ''}" data-stream="${i}" data-cmd="${cmd}">${cmd}</button>`
@@ -158,10 +96,6 @@ function render(streams) {
       `).join('')}
     </div>
   `).join('');
-
-  streams.forEach((s, i) => {
-    document.getElementById(`dl-btn-${i}`).addEventListener('click', () => startDownload(s, i));
-  });
 
   list.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {

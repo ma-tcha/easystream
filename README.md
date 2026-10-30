@@ -25,19 +25,32 @@ Le filtrage se fait sur le chemin (et non sur l'URL complète) pour éviter les 
 
 > Pour Firefox, le manifest_version 3 nécessite Firefox 109+. En cas de problème de compatibilité, passer `manifest_version` à `2` et remplacer `service_worker` par `scripts: ["background.js"]`.
 
+**Générer le paquet Chrome**
+
+```bash
+bash build.sh
+```
+
+Le paquet est écrit dans `dist/easystream-chrome.zip`. Ce dossier n'est pas versionné.
+
 ## Utilisation
 
 1. Naviguer vers une page contenant une vidéo en streaming
 2. Lancer la lecture — le flux M3U8 est intercepté automatiquement
 3. Cliquer sur l'icône EasyStream dans la barre d'extensions
-4. Chaque flux détecté affiche trois onglets :
+4. Chaque flux détecté affiche quatre onglets :
    - **curl** — requête HTTP brute, utile pour tester l'accès ou inspecter la playlist
    - **ffmpeg** — téléchargement direct en `.mp4`, nom de fichier basé sur le titre de la page
    - **vlc** — lecture directe dans VLC avec le bon Referer
+   - **yt-dlp** — téléchargement avec yt-dlp, nom de fichier basé sur le titre de la page
 5. Cliquer **Copier** pour copier la commande dans le presse-papiers
 6. **Effacer** vide la liste des flux détectés
 
 ## Commandes générées
+
+Les URL et headers proviennent des pages visitées. Ils sont échappés pour que la commande collée dans un shell ne puisse pas exécuter de code injecté.
+
+> La commande curl inclut `Cookie` et `Authorization` s'ils ont été capturés. Ne pas la partager telle quelle : ces valeurs peuvent donner accès à une session.
 
 ### curl
 
@@ -72,6 +85,19 @@ vlc \
 
 Ouvre le flux directement dans VLC. Seul le Referer est transmis — c'est généralement suffisant pour contourner les vérifications d'origine.
 
+### yt-dlp
+
+```bash
+yt-dlp \
+  --add-header 'Referer: https://exemple.com/' \
+  --add-header 'Origin: https://exemple.com' \
+  --add-header 'User-Agent: Mozilla/5.0 ...' \
+  -o "Titre_de_la_page.%(ext)s" \
+  'https://cdn.exemple.com/stream.m3u8'
+```
+
+Transmet `Referer`, `Origin` et `User-Agent`. L'extension du fichier est choisie par yt-dlp.
+
 ## Résolution des problèmes
 
 **Le flux n'apparaît pas dans la popup**
@@ -81,7 +107,7 @@ Ouvre le flux directement dans VLC. Seul le Referer est transmis — c'est gén�
 
 **Erreur 403 avec ffmpeg ou curl**
 
-Les serveurs vérifient souvent le `Referer` et l'`Origin`. Utiliser la commande curl générée pour confirmer l'accès, puis copier la commande ffmpeg qui inclut tous les headers nécessaires.
+Les serveurs vérifient souvent le `Referer` et l'`Origin`. Utiliser la commande curl générée pour confirmer l'accès, puis copier la commande ffmpeg, qui inclut `User-Agent`, `Referer` et `Origin`. Elle n'inclut pas `Cookie` ni `Authorization` : si le flux en a besoin, seule la commande curl les transmet.
 
 **Le nom de fichier est `stream.mp4`**
 
@@ -94,7 +120,8 @@ EasyStream/
 ├── manifest.json   — déclaration de l'extension (MV3)
 ├── background.js   — service worker : interception des requêtes, stockage
 ├── popup.html      — interface utilisateur
-└── popup.js        — rendu de la liste, génération des commandes
+├── popup.js        — rendu de la liste, génération des commandes
+└── build.sh        — génération du paquet Chrome
 ```
 
 ## Permissions requises
@@ -105,3 +132,7 @@ EasyStream/
 | `storage` | Persister la liste des flux entre les ouvertures de popup |
 | `tabs` | Lire le titre de la page (`tab.title`) au moment de la requête |
 | `<all_urls>` | Couvrir tous les domaines (les CDN de streaming varient) |
+
+## Licence
+
+[MIT](LICENSE)

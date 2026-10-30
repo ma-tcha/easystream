@@ -1,15 +1,13 @@
 {
   "manifest_version": 3,
   "name": "EasyStream",
-  "version": "2609.14.101",
+  "version": "2610.30.101",
   "author": "Matcha",
   "description": "Détecte les flux M3U8 et génère les commandes curl, ffmpeg et vlc. © 2026 Matcha",
   "permissions": [
     "webRequest",
     "storage",
-    "tabs",
-    "downloads",
-    "offscreen"
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
