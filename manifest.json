@@ -3,7 +3,7 @@
   "name": "EasyStream",
   "version": "2610.30.101",
   "author": "Matcha",
-  "description": "Détecte les flux M3U8 et génère les commandes curl, ffmpeg et vlc. © 2026 Matcha",
+  "description": "Détecte les flux M3U8 et génère les commandes curl, ffmpeg, vlc et yt-dlp. © 2026 Matcha",
   "permissions": [
     "webRequest",
     "storage",
